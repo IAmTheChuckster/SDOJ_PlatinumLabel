@@ -24,7 +24,8 @@ HOOKS = {
     'dn_hook':      [0x0C2212B4],
     'trybomb_hook': [0x0C211C0C],
     'acthyp_hook':  [0x0C21291C],
-    'gp_hook':      [0x0C1F6E70, 0x0C27AFFC, 0x0C27C730, 0x0C27D1B8],
+    'gp_hook':      [0x0C27AFFC, 0x0C27C730, 0x0C27D1B8],
+    'gpm_hook':     [0x0C1F6E70],
     'kill_hook':    [0x0C1F6C04, 0x0C20B3E4, 0x0C20B434, 0x0C21AC0C, 0x0C22AAAC],
     'bee_hook':     [0x0C22A030],
     'popup_hook':   [0x0C22AAB0],
@@ -38,6 +39,50 @@ HOOKS = {
     'dresstype_hook': [0x0C1F1208, 0x0C1F12B4, 0x0C1F19B8, 0x0C1F1BD4],
     'autobomb_hook': [0x0C1F1210, 0x0C1F12BC, 0x0C1F19C4, 0x0C1F1BE0],
     'dress_hook':  [0x0C27478C, 0x0C274E6C, 0x0C274FC0, 0x0C275110, 0x0C2752CC],
+    # draw list close at the end of the frame's draw pass: pod health bars, then the end marker
+    'hud_hook':    [0x0C1DCCEC],
+    'bicon_hook':  [0x0C280858],
+    'ready_hook':  [0x0C213DEC],
+    'move_hook':   [0x0C2109A4],
+    'oper_hook':   [0x0C2780C8],
+    'hcan_hook':   [0x0C1FA234],
+    'hcol_hook':   [0x0C1FE748],
+    'wobj_hook':   [0x0C21B1C0],
+    'wsd_hook':    [0x0C21B1BC],
+    'icoin_hook':  [0x0C2796B4, 0x0C279408],
+    'pks_hook':    [0x0C1F19BC, 0x0C1F1BD8, 0x0C275A94, 0x0C276230, 0x0C2766A8],
+    'pkd_hook':    [0x0C275A90, 0x0C27622C, 0x0C2766A4],
+    'pkl_hook':    [0x0C275AB0, 0x0C276240, 0x0C2766B8],
+    'wdx_hook':    [0x0C2161E8, 0x0C212AC0, 0x0C21630C, 0x0C210DFC, 0x0C2107B4, 0x0C210C58, 0x0C21102C, 0x0C211910, 0x0C214898, 0x0C21638C, 0x0C1F46A4, 0x0C1F4EE8, 0x0C1FE924, 0x0C219D70, 0x0C23BA5C, 0x0C23D788, 0x0C276020, 0x0C283E00, 0x0C284330, 0x0C2843F8, 0x0C284478, 0x0C28DCCC, 0x0C29376C, 0x0C295CCC, 0x0C295FC8],
+    'vq_hook':     [0x0C283DF4],
+    'hlvl_hook':   [0x0C27B22C],
+    'hlvd_hook':   [0x0C27E86C],
+    'rkd_hook':    [0x0C27EE0C],
+    'rbx_hook':    [0x0C279E40],
+    'mfull_hook':  [0x0C1FA8B4],
+    'sadd_hook':   [0x0C22AE64],
+    'inot_hook':   [0x0C22AE68],
+    'rban_hook':   [0x0C213DF0],
+    'rse_hook':    [0x0C213DE8],
+    'rse2_hook':   [0x0C215234],
+    'hbar_hook':   [0x0C2784E4],
+    'ameter_hook': [0x0C1FA488],
+    'hbv_hook':    [0x0C27A124, 0x0C27D3A8],
+    'hbt_hook':    [0x0C27A128, 0x0C27D3B4],
+    'sml_hook':    [0x0C1FCF70, 0x0C1FCFC0, 0x0C1FD03C, 0x0C1FD070, 0x0C1FDB50],
+    # Omake: shot cancels enemy bullets during hyper (each ship's shot update routines)
+    'shot_stub0':  [0x0C2173B4],
+    'shot_stub1':  [0x0C217670],
+    'shot_stub2':  [0x0C217A34],
+    'shot_stub3':  [0x0C217DC0],
+    'shot_stub4':  [0x0C218144],
+    'shot_stub5':  [0x0C2183B0],
+    'shot_stub6':  [0x0C218724],
+    'shot_stub7':  [0x0C2189E0],
+    'shot_stub8':  [0x0C218D64],
+    'shot_stub9':  [0x0C218FD0],
+    'shot_stub10': [0x0C219394],
+    'shot_stub11': [0x0C2196A0],
 }
 # original values, checked by the loader before patching (protects against other dumps)
 ORIG = {
@@ -60,10 +105,79 @@ ORIG = {
     0x0C1F1210: 0x0C1F7850, 0x0C1F12BC: 0x0C1F7850, 0x0C1F19C4: 0x0C1F7850, 0x0C1F1BE0: 0x0C1F7850,
     0x0C27478C: 0x0C1E4990, 0x0C274E6C: 0x0C1E4990, 0x0C274FC0: 0x0C1E4990,
     0x0C275110: 0x0C1E4990, 0x0C2752CC: 0x0C1E4990,
+    0x0C1DCCEC: 0x0C1D1744,
+    0x0C280858: 0x0C1F7BA0,
+    0x0C213DEC: 0x0C276900,
+    0x0C2109A4: 0x0C1F6960,
+    0x0C2780C8: 0x0C2769B0,
+    0x0C1FA234: 0x0C1FD040,
+    0x0C1FE748: 0x0C1FE7A0,
+    0x0C21B1C0: 0x0C1F75F0,
+    0x0C2796B4: 0x0C1E4990, 0x0C279408: 0x0C1E4990,
+    0x0C1F19BC: 0x0C1F7830, 0x0C1F1BD8: 0x0C1F7830, 0x0C275A94: 0x0C1F7830, 0x0C276230: 0x0C1F7830, 0x0C2766A8: 0x0C1F7830,
+    0x0C275A90: 0x0C1F7810, 0x0C27622C: 0x0C1F7810, 0x0C2766A4: 0x0C1F7810,
+    0x0C275AB0: 0x0C1F75E0, 0x0C276240: 0x0C1F75E0, 0x0C2766B8: 0x0C1F75E0,
+    0x0C1F46A4: 0x0C1F7820,
+    0x0C1F4EE8: 0x0C1F7820,
+    0x0C1FE924: 0x0C1F7820,
+    0x0C2107B4: 0x0C1F7820,
+    0x0C210C58: 0x0C1F7820,
+    0x0C210DFC: 0x0C1F7820,
+    0x0C21102C: 0x0C1F7820,
+    0x0C211910: 0x0C1F7820,
+    0x0C212AC0: 0x0C1F7820,
+    0x0C214898: 0x0C1F7820,
+    0x0C2161E8: 0x0C1F7820,
+    0x0C21630C: 0x0C1F7820,
+    0x0C21638C: 0x0C1F7820,
+    0x0C219D70: 0x0C1F7820,
+    0x0C21B1BC: 0x0C1F7820,
+    0x0C23BA5C: 0x0C1F7820,
+    0x0C23D788: 0x0C1F7820,
+    0x0C276020: 0x0C1F7820,
+    0x0C283E00: 0x0C1F7820,
+    0x0C284330: 0x0C1F7820,
+    0x0C2843F8: 0x0C1F7820,
+    0x0C284478: 0x0C1F7820,
+    0x0C28DCCC: 0x0C1F7820,
+    0x0C29376C: 0x0C1F7820,
+    0x0C295CCC: 0x0C1F7820,
+    0x0C295FC8: 0x0C1F7820,
+    0x0C283DF4: 0x0C276900,
+    0x0C27B22C: 0x0C1E4990,
+    0x0C27E86C: 0x0C1E4990,
+    0x0C27EE0C: 0x0C1E4990,
+    0x0C279E40: 0x0C1E4990,
+    0x0C1FA8B4: 0x0C1FA490,
+    0x0C22AE64: 0x0C1F9D90,
+    0x0C22AE68: 0x0C22AEF0,
+    0x0C213DF0: 0x0C2778B0,
+    0x0C213DE8: 0x0C282860,
+    0x0C215234: 0x0C282840,
+    0x0C2784E4: 0x0C1E4990,
+    0x0C1FA488: 0x0C1FA830,
+    0x0C27A124: 0x0C1FA5D0,
+    0x0C27A128: 0x0C1FA5F0,
+    0x0C27D3A8: 0x0C1FA5D0,
+    0x0C27D3B4: 0x0C1FA5F0,
+    0x0C1FCF70: 0x0C1FE220,
+    0x0C1FCFC0: 0x0C1FE220,
+    0x0C1FD03C: 0x0C1FE220,
+    0x0C1FD070: 0x0C1FE220,
+    0x0C1FDB50: 0x0C1FE220,
+
+
+    0x0C1DCCF4: 0x0C1DE644,
+    0x0C2173B4: 0x0C2173D0, 0x0C217670: 0x0C217680, 0x0C217A34: 0x0C217A80, 0x0C217DC0: 0x0C217DD0,
+    0x0C218144: 0x0C218160, 0x0C2183B0: 0x0C2183C0, 0x0C218724: 0x0C218770, 0x0C2189E0: 0x0C2189F0,
+    0x0C218D64: 0x0C218D80, 0x0C218FD0: 0x0C218FE0, 0x0C219394: 0x0C2193E0, 0x0C2196A0: 0x0C2196B0,
 }
 
 # plain value patches (address, original, new) - no hook code
 CONSTS = [
+    # no miss bonus at the stage-clear tally: level x 20,000,000 -> level x 50,000,000 (Ver 1.5:
+    # 50 / 100 / 150 / 200 / 250 million); the tally line and the score award
+    (0x0C28FEE0, 0x01312D00, 0x02FAF080), (0x0C291264, 0x01312D00, 0x02FAF080),
     # generic digit drawer (stage-clear bonus etc.): signed /10 -> unsigned /10,
     # so values of 2^31 and above (Hit Bonus = hits x 20,000) draw correctly
     (0x0C292490, 0x348DE60A, 0x3485E60A),  #   dmuls.l -> dmulu.l
@@ -97,7 +211,12 @@ def asm_link(src, base, tmp, name):
     o = os.path.join(tmp, name + '.o')
     elf = os.path.join(tmp, name + '.elf')
     binf = os.path.join(tmp, name + '.bin')
-    run(tool('as'), '-big', '-o', o, src)
+    dbg = ['--defsym', 'DEBUG_S4=1'] if os.environ.get('SDOJ_DEBUG_S4') else []  # debug: start on stage 4
+    if os.environ.get('SDOJ_DIAG_S4'):  # boss debug numbers on screen (off; SDOJ_DIAG_S4=1 to turn them on)
+        dbg += ['--defsym', 'DIAG_S4=1']
+    bno = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'BUILD')).read().strip()
+    dbg += ['--defsym', 'BUILDNO=' + bno]  # build number on the boot screen
+    run(tool('as'), '-big', '-I', tmp, *dbg, '-o', o, src)
     run(tool('ld'), '-EB', '-Ttext=0x%08X' % base, '-e', '0x%08X' % base, '-o', elf, o)
     run(tool('objcopy'), '-O', 'binary', '-j', '.text', elf, binf)
     syms = {}
@@ -170,7 +289,7 @@ def main():
             table.append((a, ORIG[a], syms[sym]))
     table += CONSTS
     lsrc = os.path.join(tmp, 'loader.s')
-    open(lsrc, 'w').write(loader_source(len(blob), table, syms['boot_init'], len(HOOKS['title_hook']) + len(HOOKS['ds_hook'])))
+    open(lsrc, 'w').write(loader_source(len(blob), table, syms['boot_init'], len(HOOKS['title_hook']) + len(HOOKS['ds_hook']) + len(HOOKS['dn_hook'])))
     loader, _ = asm_link(lsrc, 0xA0000000 | ROM_LOADER, tmp, 'loader')
 
     # changes in big-endian u4 coordinates
