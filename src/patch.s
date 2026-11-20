@@ -5193,17 +5193,12 @@ sf_atan:
 sf_wo:    .word 0x21CC
 sf_60:    .word 16384             ! streams from 50% (with the 烈怒 label)
         .align 2
-! Omake: graze every frame in play (adds to HIT), then the streams only while a hyper is running
+! Omake: the streams only while a hyper is running
 sf_omk:
         mov.l   sf_play,r1
         mov.l   @r1,r0
         tst     r0,r0
         bt      1f
-        sts.l   pr,@-r15
-        mov.l   sf_gz,r0
-        jsr     @r0
-        nop
-        lds.l   @r15+,pr
         mov.l   sf_pl1,r1
         mov.l   sf_2e0,r0
         mov.l   @(r0,r1),r0
@@ -5217,7 +5212,6 @@ sf_omk:
         .align 2
 sf_2e0:   .long 0x2E0
 sf_goa:   .long sf_go
-sf_gz:    .long graze
 sf_pl1:   .long 0x0C5F9970
         .align 2
 sf_vars:  .long v_mode
@@ -6192,211 +6186,6 @@ ic_far:   .long 0xE0000000
 ic_y:     .long dk_icy
 ic_fc:    .long 0x0C5F7D60
 
-! Power Mode: grazing. Every frame, each enemy bullet and each live enemy within GR_RAD pixels of player 1 (x and y,
-! a box about the ship's body) adds GR_ADD to the HIT count (+0x1FC) and to the graze count (dk_graze, shown under
-! the 烈怒 bar). Player 1 at +0xB0 / +0xB4. Bullets: the manager (*0x0C4C8978 + 0x30DFC), +20 first, each +4 next,
-! +0 state (2 = live), +0x2C / +0x30 x / y. Enemies: slots EN_BASE + k * EN_STRIDE, work at +0x21CC (pointing back),
-! +4 / +8 x / y. All 16.16, the same axes.
-        .equ GR_RAD,    20              ! graze distance (px)
-        .equ GR_ADD,    1               ! hits per grazing bullet / enemy per frame
-graze:
-        sts.l   pr,@-r15
-        mov.l   r8,@-r15
-        mov.l   r9,@-r15
-        mov.l   r10,@-r15
-        mov.l   r11,@-r15
-        mov.l   gz_p1,r1            ! r10 / r11 = player x / y
-        mov.w   gz_b0,r0
-        mov.l   @(r0,r1),r10
-        add     #4,r0
-        mov.l   @(r0,r1),r11
-        mov     #0,r8               ! grazing things
-        mov.l   gz_rad,r9
-        mov.l   gz_mgr,r1           ! bullets
-        mov.l   @r1,r1
-        tst     r1,r1
-        bt      5f
-        mov.l   gz_off,r0
-        add     r0,r1
-        mov.l   @(20,r1),r2
-        mov     #0,r7               ! (at most 1000: a broken list stops)
-        mov.w   gz_max,r6
-1:      tst     r2,r2
-        bt      5f
-        add     #1,r7
-        cmp/gt  r6,r7
-        bt      5f
-        mov.l   @r2,r0
-        cmp/eq  #2,r0
-        bf      4f
-        mov     r2,r3
-        add     #0x2C,r3
-        mov.l   @r3+,r4
-        bsr     gz_near
-        mov.l   @r3,r5
-4:      bra     1b
-        mov.l   @(4,r2),r2
-5:      mov.l   gz_en,r2            ! enemies
-        mov     #EN_N,r6
-6:      mov.w   gz_wo,r0
-        mov.l   @(r0,r2),r3
-        mov.l   gz_lo,r0
-        cmp/hs  r0,r3
-        bf      7f
-        mov.l   gz_hi,r0
-        cmp/hs  r0,r3
-        bt      7f
-        mov.l   @r3,r0
-        cmp/eq  r2,r0
-        bf      7f
-        mov.l   @(4,r3),r4
-        bsr     gz_near
-        mov.l   @(8,r3),r5
-7:      mov.l   gz_str,r0
-        dt      r6
-        bf/s    6b
-        add     r0,r2
-        tst     r8,r8
-        bt      9f
-        mov.l   gz_p1,r1            ! HIT count and graze count += grazing
-        mov.w   gz_1fc,r0
-        mov.l   @(r0,r1),r2
-        add     r8,r2
-        mov.l   r2,@(r0,r1)
-        mov.l   gz_cnt,r1
-        mov.l   @r1,r2
-        add     r8,r2
-        mov.l   r2,@r1
-9:      mov.l   @r15+,r11
-        mov.l   @r15+,r10
-        mov.l   @r15+,r9
-        mov.l   @r15+,r8
-        lds.l   @r15+,pr
-        rts
-        nop
-gz_near:                            ! r4 / r5 = x / y: within r9 of the player (r10 / r11) -> r8 += GR_ADD
-        sub     r10,r4
-        cmp/pz  r4
-        bt      1f
-        neg     r4,r4
-1:      cmp/gt  r9,r4
-        bt      2f
-        sub     r11,r5
-        cmp/pz  r5
-        bt      3f
-        neg     r5,r5
-3:      cmp/gt  r9,r5
-        bt      2f
-        add     #GR_ADD,r8
-2:      rts
-        nop
-        .align 1
-gz_max:   .word 1000
-gz_1fc:   .word 0x1FC
-gz_b0:    .word 0xB0
-gz_wo:    .word 0x21CC
-        .align 2
-gz_p1:    .long 0x0C5F9970
-gz_mgr:   .long 0x0C4C8978
-gz_off:   .long 0x00030DFC
-gz_rad:   .long GR_RAD << 16
-gz_en:    .long EN_BASE
-gz_str:   .long EN_STRIDE
-gz_lo:    .long 0x0C000000
-gz_hi:    .long 0x0D000000
-gz_cnt:   .long dk_graze
-
-! The graze count (dk_graze) under the right end of the 烈怒 bar, while the bar is shown: the game's orange
-! digit sprites 0x11554-0x1155D (its CONTINUE countdown digits), GT_DX apart
-graze_text:
-        mov.l   gt_icy,r1           ! hidden with the bar (no INSERT COIN for half a second)
-        mov.l   @(4,r1),r1
-        mov.l   gt_fc,r2
-        mov.l   @r2,r2
-        sub     r1,r2
-        mov     #30,r1
-        cmp/hi  r1,r2
-        bt      9f
-        sts.l   pr,@-r15
-        mov.l   gt_buf,r2           ! the number's digits, no leading zeros
-        mov.l   gt_cnt,r1
-        mov.l   @r1,r4              ! value
-        mova    gt_p10,r0
-        mov     r0,r5               ! powers of ten, 0-terminated
-        mov     #0,r6               ! a digit written yet
-3:      mov.l   @r5+,r7
-        tst     r7,r7
-        bt      6f
-        mov     #0,r0
-4:      cmp/hs  r7,r4
-        bf      5f
-        sub     r7,r4
-        bra     4b
-        add     #1,r0
-5:      tst     r0,r0
-        bf      7f
-        tst     r6,r6
-        bt      3b
-7:      mov     #1,r6
-        add     #48,r0
-        mov.b   r0,@r2
-        bra     3b
-        add     #1,r2
-6:      tst     r6,r6
-        bf      8f
-        mov     #48,r0              ! 0
-        mov.b   r0,@r2
-        add     #1,r2
-8:      mov     #0,r0
-        mov.b   r0,@r2
-        mov.l   r8,@-r15
-        mov.l   r9,@-r15
-        mov.l   gt_buf,r8           ! one sprite per digit, right-aligned to the bar's right end
-        mov     r2,r9
-        sub     r8,r9               ! digits
-        mov     #GT_DX,r0
-        mulu.w  r0,r9
-        sts     macl,r0
-        mov.w   gt_x,r9
-        sub     r0,r9
-10:     mov.b   @r8+,r0
-        tst     r0,r0
-        bt      11f
-        add     #-48,r0
-        mov.l   gt_d0,r4
-        add     r0,r4               ! sprite 0x11554 + digit
-        mov     r9,r5
-        shll16  r5
-        mov.l   gt_up,r6            ! game up = bar height - 7 (just under the bar)
-        mov.l   @r6,r6
-        add     #-7,r6
-        shll16  r6
-        mov     #-24,r7
-        extu.b  r7,r7               ! priority 0xE8
-        mov.l   gt_spr,r0
-        jsr     @r0
-        nop
-        bra     10b
-        add     #GT_DX,r9
-11:     mov.l   @r15+,r9
-        mov.l   @r15+,r8
-        lds.l   @r15+,pr
-9:      rts
-        nop
-        .align 1
-gt_x:     .word GT_RX
-        .equ GT_RX,     234             ! right end of the number (screen x)
-        .equ GT_DX,     12              ! digit spacing (px)
-        .align 2
-gt_icy:   .long dk_icy
-gt_fc:    .long 0x0C5F7D60
-gt_buf:   .long dk_gbuf
-gt_cnt:   .long dk_graze
-gt_up:    .long dk_gaup
-gt_d0:    .long 0x11554          ! sprite: orange digit 0
-gt_spr:   .long 0x0C1E4990       ! game: draw a sprite
-gt_p10:   .long 100000000, 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1, 0
-
 ! Power Mode (from bicon_hook, P1, in play): one bomb icon (the 2P one, sprite 0x113C0) per bomb P1 holds, in the
 ! 2P bomb slots (screen x 227, 208, 189, 170, 151, 132), up to 6
 p2_bombs:
@@ -6465,28 +6254,12 @@ gauge_draw:
         mov.l   @r1,r0
         tst     r0,r0
         bf      47f
-        mov.l   ga_earn,r1          ! not in play: no bombs earned, no grazes
+        mov.l   ga_earn,r1          ! not in play: no bombs earned
         mov     #0,r0
-        mov.l   r0,@r1
-        mov.l   ga_gzc,r1
         bra     9f
         mov.l   r0,@r1
 47:
         sts.l   pr,@-r15
-        mov.l   ga_stg,r1           ! a new stage: the graze count starts again
-        mov.l   @r1,r1
-        mov.l   ga_lstg,r2
-        mov.l   @r2,r0
-        cmp/eq  r1,r0
-        bt      48f
-        mov.l   r1,@r2
-        mov.l   ga_gzc,r2
-        mov     #0,r0
-        mov.l   r0,@r2
-48:
-        mov.l   ga_graze,r0         ! grazing: bullets near player 1 add to the HIT count
-        jsr     @r0
-        nop
         mov.l   ga_bossf,r0         ! height: where INSERT COIN would be (it moves under a boss bar)
         jsr     @r0
         nop
@@ -6857,10 +6630,6 @@ ga_b:     .long dk_boost
 ga_in:    .long 0x0C1DCD6C       ! P1 held buttons
 ga_upl:   .long 0x0C1D17C0       ! game: upload header
 ga_upv:   .long dk_gaup
-ga_graze: .long graze
-ga_stg:   .long 0x0C31DFDC       ! game: current stage
-ga_lstg:  .long dk_lstage
-ga_gzc:   .long dk_graze
 ga_icy:   .long dk_icy
 ga_bossf: .long ga_boss
 ga_lp:    .long 0x0C1D1460
@@ -7254,9 +7023,6 @@ bicon_hook:
         jsr     @r0                 ! the HUD like NORMAL / BOOST)
         mov     r9,r4
 42:
-        mov.l   bic_gzf,r0          ! the graze count under the 烈怒 bar
-        jsr     @r0
-        nop
         mov.l   bic_hx,r0           ! rank digits and HYPER on the top HUD
         jsr     @r0
         nop
@@ -7318,7 +7084,6 @@ bic_fc:    .long 0x0C5F7D60
 bic_cyan:  .long 0x00287080
 bic_in:    .long 0x0C1DCD6C
 bic_white: .long 0x00808080
-bic_gzf:   .long graze_text
 bic_p2b:   .long p2_bombs
 bic_sn:    .asciz "NORMAL"
         .align 2
@@ -7612,9 +7377,6 @@ dk_filok: .long 0                 ! dk_fill filled
 dk_lblok: .long 0                 ! dk_lbl filled
 dk_icy:   .long 0                 ! INSERT COIN's last draw height (16.16), 0 = not yet
 dk_icfc:  .long 0                 ! the frame it was last drawn (read as dk_icy + 4)
-dk_lstage: .long 0               ! the stage graze was last counted in
-dk_graze: .long 0                 ! bullets / enemies grazed (shown under the 烈怒 bar)
-dk_gbuf:  .long 0, 0, 0, 0, 0     ! its text ("GRAZE " + up to 9 digits)
 dk_gaup:  .long 270               ! gauge height this frame (ga_boss)
 dk_earn:  .long 0                 ! bombs earned from pickups (Power Mode)
 dk_lastbl: .long 0                ! lives << 8 | bombs seen last frame

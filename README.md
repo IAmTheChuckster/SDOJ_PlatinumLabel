@@ -32,13 +32,11 @@ The original arcade game (buttons, weapons, bombs, bees, stage 1 boss pods, mete
 - **烈怒 bullet streams**: from 50% on the gauge, every on-screen enemy with hit points fires a bullet aimed at you every **10 frames**.
 - **GP bonus** follows the gauge: x2.0, +0.2 per 10%, up to x3.0 from 50%.
 - **Bomb multiplier**: picking up a bomb sets kill score x2, each further pickup +1 (up to x99); using a bomb resets it.
-- **Grazing**: every frame, each enemy bullet and enemy within 20 px of you adds 1 to HIT; the number of grazes is shown in orange under the right end of the gauge (reset every stage).
 - **Shots add to HIT**: every shot that hits something on screen adds 1 to HIT.
 - **HYPER** text flashes gold and white while a hyper is ready.
 - Otherwise as Omake below.
 
 ### Omake
-- **Grazing**: every frame, each enemy bullet and enemy within 20 px of you adds 1 to HIT (no graze number shown).
 - **Shots add to HIT**: every shot that hits something on screen adds 1 to HIT.
 - **Bullet streams in hyper**: while a hyper is running, every on-screen enemy with hit points fires a bullet aimed at you every **10 frames**.
 
@@ -65,7 +63,7 @@ You need:
 
 The patcher creates:
 
-- `plat_u4` - the patched program ROM (CRC `0e8599a9`)
+- `plat_u4` - the patched program ROM (CRC `121b54ce`)
 - `ddpsdojplat.zip` - your set with u4 replaced by `plat_u4`, and u23 / u24 by `plat_u23` / `plat_u24` (the sound ROMs with dfkbl's NORMAL / BOOST switch sound added, taken from your own dfkbl.zip)
 - `DoDonPachi SaiDaiOuJou Platinum Label.mra` - the MiSTer MRA
 

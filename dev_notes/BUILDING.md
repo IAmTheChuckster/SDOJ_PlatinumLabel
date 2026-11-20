@@ -1,6 +1,6 @@
 # Building SDOJ Platinum Label
 
-Current build: see `tools/BUILD` (build 264 when this was written, 2026-11-20).
+Current build: see `tools/BUILD` (build 265 when this was written, 2026-11-20).
 
 ## What you need
 - Python 3 and Pillow (`pip install pillow`).
@@ -64,8 +64,6 @@ Do not commit or push from the working folder; the user handles git.
 
 ## Main routines in src/patch.s
 - `gauge_draw` / `ga_slice` / `ga_fill`: the 烈怒 gauge (static fill plus a quarter-opacity copy scrolling right). It follows INSERT COIN's height and hides 30 frames after the last message (score tally). The look is approved; don't change it unasked.
-- `graze`: draws nothing. Each frame it adds HIT and the graze count for bullets and enemies within GR_RAD 20 px of player 1. Power calls it from gauge_draw, Omake from stream_frame.
-- `graze_text`: the orange graze number, Power only.
 - `stream_frame`: the aimed bullet streams every ST_RATE (10) frames. Power: from 50% on the gauge (sf_60). Omake: only while a hyper is running.
 - `shot_common` / `sc_gone`: a shot removed while on screen adds 1 to HIT (Power and Omake).
 - `p2_bombs` / `bicon_hook`: the Power bottom bar (NORMAL/BOOST, bomb icons 0x113B0+).
